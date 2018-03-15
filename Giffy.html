@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Giphy copycat!</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="jumbotron">
+        <h1 class="display-3">Welcome to the Giphy Copycat!</h1>
+        <p class="lead">This a simple website that accesses Giphy API to pull trending Gif.</p>
+        <hr class="my-4">
+        <p>Go ahead and get your Gif on!</p>
+    </div>
+
+    <div id="buttons-view"></div>
+
+    <form id="gif-form">
+        <label for="gif-input">Search</label>
+        <input type="text" id="gif-input">
+        <br>
+        <input id="add-gif" type="submit" value="Add Gif">
+    </form>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div id="gifs"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        
+        // First I have to create an array of gifs that can be dynamically added to by the user later
+        var gifs = ["Bye Felecia", "Wakanda Forever", "Patrick", "Black Panther", "Migos", "Rich Chigga", "Why you always lying", "Lebron James", "Cleveland Browns", "How Sway", "lil uzi vert", "Deez Nuts", "Donald Trump"];
+
+        function renderButtons() {
+            $("#buttons-view").empty();
+            // Loops through the array of gifs and adds a button for each of them
+            for (var i = 0; i < gifs.length; i++) {
+                var a = $("<button>");
+                a.addClass("gif");
+                a.addClass("btn btn-primary");
+                a.attr("data-name", gifs[i]);
+                a.text(gifs[i]);
+                $("#buttons-view").append(a);
+            }
+        }
+        // This function handles events where the add gif button is clicked
+        $("#add-gif").on("click", function (event) {
+            event.preventDefault();
+
+            // Next i need to grab the input from the textbox
+            var gif = $("#gif-input").val().trim();
+
+            // Then need to code that will add user input to the gifs array
+            gifs.push(gif);
+            console.log(gifs);
+
+            // Calling renderButtons which handles the processing of our gif array
+            renderButtons();
+
+
+        });
+        //iniates the function
+        renderButtons();
+
+        $(document).on("click", ".gif", displayGIF);
+
+        function displayGIF() {
+            console.log("clicky mcClickClick");
+            var newGIF = $(this).attr("data-name");
+            console.log(newGIF);
+            $("#gifs").empty();
+           
+            var apiKey = "7DqXJ487MHBP1FMs4hBefGKcjbry6tRQ";
+            // Giphy API and API key
+            var queryURL = "https://api.giphy.com/v1/gifs/search?api_key=7DqXJ487MHBP1FMs4hBefGKcjbry6tRQ&q=" + newGIF + "&limit=5&offset=0&rating=PG-13&lang=en";
+            $.ajax({
+                url: queryURL,
+                method: 'GET'
+            }).then(function (result) {
+                var results = result.data;
+                console.log(results);
+                for (var i = 0; i < results.length; i++) {
+                    var gifDiv = $("<div class=\"gif-item\">");
+
+                    var rating = results[i].rating;
+                    var title = results[i].title;
+                    console.log(title);
+
+                    var showRating = $("<p>").text("Rating: " + rating);
+                    var make = $("<p>").text("Make: " + title);
+                    var animated = results[i].images.fixed_height.url;
+                    var still = results[i].images.fixed_height_still.url;
+
+                    var gifImage = $("<img>");
+                    gifImage.attr("src", animated);
+                    gifImage.attr("data-still", still);
+                    gifImage.attr("data-animate", animated);
+                    gifImage.attr("data-state", "still");
+                    gifImage.addClass("gif");
+
+
+                    gifDiv.append(showRating);
+                    gifDiv.append(make);
+                    gifDiv.append(gifImage);
+
+                    $("#gifs").append(gifDiv);
+                }
+                $(".gif").on("click", function () {
+                    console.log("click");
+                    var state = $(this).attr("data-state");
+                    console.log(state);
+                    
+                    //need code to start a gif
+                    if (state === "still") {
+                        $(this).attr("src", $(this).attr("data-animate"));
+                        $(this).attr("data-state", "anmiated");
+                    } else {
+                        $(this).attr("src", $(this).attr("data-still"));
+                        $(this).attr("data-state", "still");
+                    }
+                });
+            })
+        }
+
+    </script>
+
+</body>
+
+</html>
